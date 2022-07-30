@@ -37,7 +37,7 @@ jobs:
           name: openssl-static-${{ env.openssl_3xx_ver }}
 
       - name: Release
-        uses: softprops/action-gh-release@1e07f43 #v1
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5 #v1
         with:
           files: |
             ./openssl-OpenSSL_${{ env.openssl_1xx_ver }}.exe
