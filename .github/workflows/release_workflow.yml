@@ -1,0 +1,42 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  openssl_1xx_ver: 1_1_1q
+  openssl_3xx_ver: 3.0.5
+
+jobs:
+  build-and-upload-openssl-static-1xx:
+    uses: ./.github/workflows/openssl-static_1xx_base_workflow.yml
+    with:
+      openssl_ver: ${{ env.openssl_1xx_ver }}
+
+  build-and-upload-openssl-static-3xx:
+    uses: ./.github/workflows/openssl_static_3xx_base_workflow.yml
+    with:
+      openssl_ver: ${{ env.openssl_3xx_ver }}
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [build-and-upload-openssl-static-1xx,build-and-upload-openssl-static-3xx]
+    steps:
+      - name: Download openssl-1xx release file
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 #v3.0.0
+        with:
+          name: openssl-static-${{ env.openssl_1xx_ver }}
+
+      - name: Download openssl-3xx release file
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 #v3.0.0
+        with:
+          name: openssl-static-${{ env.openssl_3xx_ver }}
+
+      - name: Release
+        uses: softprops/action-gh-release@1e07f43 #v1
+        with:
+          files: |
+            ./openssl-OpenSSL_${{ env.openssl_1xx_ver }}.exe
+            ./openssl-openssl-${{ env.openssl_3xx_ver }}.exe
