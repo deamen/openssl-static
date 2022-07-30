@@ -35,8 +35,12 @@ jobs:
         run: nmake
         working-directory: ./${{ env.pkg_name }}
 
+      - name: Rename openssl.exe
+        run: copy apps\openssl.exe apps\${{ env.pkg_name }}.exe
+        working-directory: ./${{ env.pkg_name }}
+
       - name: Upload the openssl-${{ inputs.openssl_ver }}
         uses: actions/upload-artifact@v3
         with:
           name: openssl-static-${{ inputs.openssl_ver }}
-          path: ./${{ env.pkg_name }}/apps/openssl.exe
+          path: ./${{ env.pkg_name }}/apps/${{ env.pkg_name }}.exe
