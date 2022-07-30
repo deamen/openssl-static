@@ -5,6 +5,8 @@ on:
     tags:
       - '*'
 
+  workflow_dispatch:
+
 env:
   openssl_1xx_ver: 1_1_1q
   openssl_3xx_ver: 3.0.5
