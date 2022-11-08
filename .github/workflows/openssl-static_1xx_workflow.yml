@@ -12,4 +12,4 @@ jobs:
   Build-and-upload-openssl-static-1xx:
     uses: ./.github/workflows/openssl-static_1xx_base_workflow.yml
     with:
-      openssl_ver: 1_1_1q
+      openssl_ver: 1_1_1s
