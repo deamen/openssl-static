@@ -12,4 +12,4 @@ jobs:
   Build-and-upload-openssl-static-3xx:
     uses: ./.github/workflows/openssl_static_3xx_base_workflow.yml
     with:
-      openssl_ver: 3.0.7
+      openssl_ver: 3.0.8
