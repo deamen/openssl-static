@@ -9,7 +9,7 @@ on:
 
 env:
   openssl_1xx_ver: 1_1_1t
-  openssl_3xx_ver: 3.0.8
+  openssl_3xx_ver: 3.1.0
 
 jobs:
   build-and-upload-openssl-static-1xx:
@@ -20,7 +20,7 @@ jobs:
   build-and-upload-openssl-static-3xx:
     uses: ./.github/workflows/openssl_static_3xx_base_workflow.yml
     with:
-      openssl_ver: 3.0.8
+      openssl_ver: 3.1.0
 
   create-release:
     runs-on: ubuntu-latest
