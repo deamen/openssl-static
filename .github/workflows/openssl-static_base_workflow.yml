@@ -1,0 +1,50 @@
+name: openssl-static base workflow
+
+on:
+  workflow_call:
+    inputs:
+      openssl_ver:
+        required: True
+        type: string
+      openssl_pkg_name:
+        required: True
+        type: string
+      openssl_source_url:
+        required: True
+        type: string
+
+jobs:
+ 
+  build-openssl-static-bin:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ilammy/setup-nasm@321e6ed62a1fc77024a3bd853deb33645e8b22c4 #v1.4.0
+      - uses: ilammy/msvc-dev-cmd@cec98b9d092141f74527d0afa6feb2af698cfe89 #v1.12.1
+        with:
+          arch: amd64
+
+      - name: Download ${{ inputs.openssl_ver }} source code
+        run: aria2c ${{ inputs.openssl_source_url }}
+
+      - name: Unzip ${{ inputs.openssl_ver }} source code
+        run: 7z x ./${{ inputs.openssl_pkg_name }}.zip
+
+      - name: Generate makefile
+        run: perl Configure VC-WIN64A no-shared no-comp -no-zlib -no-zlib-dynamic
+        working-directory: ./${{ inputs.openssl_pkg_name }}
+
+      - name: Build openssl-static
+        run: nmake
+        working-directory: ./${{ inputs.openssl_pkg_name }}
+
+      - name: Rename openssl.exe
+        run: copy apps\openssl.exe apps\${{ inputs.openssl_pkg_name }}.exe
+        working-directory: ./${{ inputs.openssl_pkg_name }}
+
+      - name: Upload the openssl-${{ inputs.openssl_ver }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: openssl-static-${{ inputs.openssl_ver }}
+          path: ./${{ inputs.openssl_pkg_name }}/apps/${{ inputs.openssl_pkg_name }}.exe
