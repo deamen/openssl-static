@@ -17,6 +17,7 @@ jobs:
 
       - id: Read-OpenSSL-version
         name: Read OpenSSL version from file
+        shell: pwsh
         run: |
             openssl_ver=$(Get-Content openssl_versions.yml | Select-String -Pattern "openssl_ver_1xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
             Write-Host "::set-output name=openssl_ver::$openssl_ver"
