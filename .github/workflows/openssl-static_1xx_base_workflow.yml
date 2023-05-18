@@ -4,10 +4,8 @@ on:
   workflow_call:
     inputs:
       openssl_ver:
-        required: true
+        required: false
         type: string
-env:
-    pkg_name: openssl-OpenSSL_${{ inputs.openssl_ver}}
 
 jobs:
  
@@ -16,31 +14,39 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - id: Read-OpenSSL-version
+        name: Read OpenSSL version from file
+        run: |
+          openssl_ver=$(cat openssl_versions.yml | grep openssl_ver_1xx | cut -d':' -f2 | tr -d ' ')
+          echo "::set-output name=openssl_ver::$openssl_ver"
+          echo "::set-output name=pkg_name::openssl-OpenSSL_${openssl_ver}"
+
       - uses: ilammy/setup-nasm@229bfed4a21b01237d340787ea51fd7c50a49c54 #v1.3.0
       - uses: ilammy/msvc-dev-cmd@d8610e2b41c6d0f0c3b4c46dad8df0fd826c68e1 #v1.10.0
         with:
           arch: amd64
 
-      - name: Download ${{ inputs.openssl_ver }} source code
-        run: aria2c https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_${{ inputs.openssl_ver}}.zip
+      - name: Download ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }} source code
+        run: aria2c https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}.zip
 
-      - name: Unzip ${{ inputs.openssl_ver }} source code
-        run: 7z x ./${{ env.pkg_name }}.zip
+      - name: Unzip ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }} source code
+        run: 7z x ./${{ steps.Read-OpenSSL-version.outputs.pkg_name }}.zip
 
       - name: Generate makefile
         run: perl Configure VC-WIN64A no-shared no-comp -no-zlib -no-zlib-dynamic
-        working-directory: ./${{ env.pkg_name }}
+        working-directory: ./${{ steps.Read-OpenSSL-version.outputs.pkg_name }}
 
       - name: Build openssl-static
         run: nmake
-        working-directory: ./${{ env.pkg_name }}
+        working-directory: ./${{ steps.Read-OpenSSL-version.outputs.pkg_name }}
 
       - name: Rename openssl.exe
-        run: copy apps\openssl.exe apps\${{ env.pkg_name }}.exe
-        working-directory: ./${{ env.pkg_name }}
+        run: copy apps\openssl.exe apps\${{ steps.Read-OpenSSL-version.outputs.pkg_name }}.exe
+        working-directory: ./${{ steps.Read-OpenSSL-version.outputs.pkg_name }}
 
-      - name: Upload the openssl-${{ inputs.openssl_ver }}
+      - name: Upload the openssl-${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
         uses: actions/upload-artifact@v3
         with:
-          name: openssl-static-${{ inputs.openssl_ver }}
-          path: ./${{ env.pkg_name }}/apps/${{ env.pkg_name }}.exe
+          name: openssl-static-${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
+          path: ./${{ steps.Read-OpenSSL-version.outputs.pkg_name }}/apps/${{ steps.Read-OpenSSL-version.outputs.pkg_name }}.exe
