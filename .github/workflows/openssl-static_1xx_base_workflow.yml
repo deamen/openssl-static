@@ -20,8 +20,8 @@ jobs:
         shell: pwsh
         run: |
             $openssl_ver=$(Get-Content openssl_versions.yml | Select-String -Pattern "openssl_ver_1xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
-            Write-Host "openssl_ver=${openssl_ver}" >> $GITHUB_OUTPUT
-            Write-Host "pkg_name=openssl-OpenSSL_${openssl_ver}" >> $GITHUB_OUTPUT
+            Write-Output "openssl_ver=${openssl_ver}" >> $GITHUB_OUTPUT
+            Write-Output "pkg_name=openssl-OpenSSL_${openssl_ver}" >> $GITHUB_OUTPUT
 
 
       - uses: ilammy/setup-nasm@229bfed4a21b01237d340787ea51fd7c50a49c54 #v1.3.0
