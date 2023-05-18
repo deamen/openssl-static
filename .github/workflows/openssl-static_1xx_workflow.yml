@@ -28,8 +28,9 @@ jobs:
             $openssl_ver=$(Get-Content openssl_1xx_versions.yml | Select-String -Pattern "openssl_ver_1xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
             Write-Output "openssl_ver=${openssl_ver}" >> $env:GITHUB_OUTPUT
             Write-Output "pkg_name=openssl-OpenSSL_${openssl_ver}" >> $env:GITHUB_OUTPUT
-      - uses: ./.github/workflows/openssl-static_base_workflow.yml
-        with:
-          openssl_ver: ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
-          openssl_pkg_name: ${{ steps.Read-OpenSSL-version.outputs.pkg_name }}.zip
-          openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}.zip
+
+    uses: ./.github/workflows/openssl-static_base_workflow.yml
+    with:
+      openssl_ver: ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
+      openssl_pkg_name: ${{ steps.Read-OpenSSL-version.outputs.pkg_name }}.zip
+      openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}.zip
