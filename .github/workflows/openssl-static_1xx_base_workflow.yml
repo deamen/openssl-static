@@ -18,9 +18,10 @@ jobs:
       - id: Read-OpenSSL-version
         name: Read OpenSSL version from file
         run: |
-          openssl_ver=$(cat openssl_versions.yml | grep openssl_ver_1xx | cut -d':' -f2 | tr -d ' ')
-          echo "::set-output name=openssl_ver::$openssl_ver"
-          echo "::set-output name=pkg_name::openssl-OpenSSL_${openssl_ver}"
+            openssl_ver=$(Get-Content openssl_versions.yml | Select-String -Pattern "openssl_ver_1xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
+            Write-Host "::set-output name=openssl_ver::$openssl_ver"
+            Write-Host "::set-output name=pkg_name::openssl-OpenSSL_${openssl_ver}"
+
 
       - uses: ilammy/setup-nasm@229bfed4a21b01237d340787ea51fd7c50a49c54 #v1.3.0
       - uses: ilammy/msvc-dev-cmd@d8610e2b41c6d0f0c3b4c46dad8df0fd826c68e1 #v1.10.0
