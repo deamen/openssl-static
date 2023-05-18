@@ -25,7 +25,7 @@ jobs:
 
 
       - uses: ilammy/setup-nasm@229bfed4a21b01237d340787ea51fd7c50a49c54 #v1.3.0
-      - uses: ilammy/msvc-dev-cmd@d8610e2b41c6d0f0c3b4c46dad8df0fd826c68e1 #v1.10.0
+      - uses: ilammy/msvc-dev-cmd@cec98b9d092141f74527d0afa6feb2af698cfe89 #v1.12.1
         with:
           arch: amd64
 
