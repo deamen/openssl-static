@@ -3,8 +3,12 @@ name: "Build openssl-static 1xx Windows"
 on:
   push:
     branches: [ "master" ]
+    paths:
+      - 'openssl_1xx_versions.yml'
   pull_request:
     branches: [ "master" ]
+    paths:
+      - 'openssl_1xx_versions.yml'
 
   workflow_dispatch:
 

@@ -10,7 +10,7 @@ on:
 jobs:
  
   build-openssl-static-bin:
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
       - uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
         name: Read OpenSSL version from file
         shell: pwsh
         run: |
-            $openssl_ver=$(Get-Content openssl_versions.yml | Select-String -Pattern "openssl_ver_1xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
+            $openssl_ver=$(Get-Content openssl_1xx_versions.yml | Select-String -Pattern "openssl_ver_1xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
             Write-Output "openssl_ver=${openssl_ver}" >> $env:GITHUB_OUTPUT
             Write-Output "pkg_name=openssl-OpenSSL_${openssl_ver}" >> $env:GITHUB_OUTPUT
 
