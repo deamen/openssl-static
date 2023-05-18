@@ -16,10 +16,8 @@ on:
 jobs:
  
   build-openssl-static-bin:
-    runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
       - uses: ilammy/setup-nasm@321e6ed62a1fc77024a3bd853deb33645e8b22c4 #v1.4.0
       - uses: ilammy/msvc-dev-cmd@cec98b9d092141f74527d0afa6feb2af698cfe89 #v1.12.1
         with:
