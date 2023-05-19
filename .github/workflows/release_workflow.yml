@@ -7,38 +7,71 @@ on:
 
   workflow_dispatch:
 
-env:
-  openssl_1xx_ver: 1_1_1t
-  openssl_3xx_ver: 3.1.0
-
 jobs:
-  build-and-upload-openssl-static-1xx:
-    uses: ./.github/workflows/openssl-static_1xx_base_workflow.yml
-    with:
-      openssl_ver: 1_1_1t
+  Get-openssl-static-3xx-version:
+    runs-on: windows-2022
+    outputs:
+      openssl_3xx_ver: ${{ steps.Read-OpenSSL-3xx-version.outputs.openssl_3xx_ver }}
+      pkg_3xx_name: ${{ steps.Read-OpenSSL-3xx-version.outputs.pkg_3xx_name }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: Read-OpenSSL-3xx-version
+        name: Read OpenSSL 3xx version from file
+        shell: pwsh
+        run: |
+            $openssl_3xx_ver=$(Get-Content openssl_3xx_versions.yml | Select-String -Pattern "openssl_ver_3xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
+            Write-Output "openssl_3xx_ver=${openssl_3xx_ver}" >> $env:GITHUB_OUTPUT
+            Write-Output "pkg_3xx_name=openssl-openssl-${openssl_3xx_ver}" >> $env:GITHUB_OUTPUT
 
-  build-and-upload-openssl-static-3xx:
-    uses: ./.github/workflows/openssl_static_3xx_base_workflow.yml
+
+  Get-openssl-static-1xx-version:
+    runs-on: windows-2022
+    outputs:
+      openssl_1xx_ver: ${{ steps.Read-OpenSSL-1xx-version.outputs.openssl_1xx_ver }}
+      pkg_1xx_name: ${{ steps.Read-OpenSSL-1xx-version.outputs.pkg_1xx_name }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: Read-OpenSSL-1xx-version
+        name: Read OpenSSL 1xx version from file
+        shell: pwsh
+        run: |
+            $openssl_1xx_ver=$(Get-Content openssl_1xx_versions.yml | Select-String -Pattern "openssl_ver_1xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
+            Write-Output "openssl_1xx_ver=${openssl_1xx_ver}" >> $env:GITHUB_OUTPUT
+            Write-Output "pkg_1xx_name=openssl-OpenSSL_${openssl_1xx_ver}" >> $env:GITHUB_OUTPUT
+
+  Build-and-upload-openssl-static-1xx:
+    needs: Get-openssl-static-1xx-version
+    uses: ./.github/workflows/openssl-static_base_workflow.yml
     with:
-      openssl_ver: 3.1.0
+      openssl_ver: ${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}
+      openssl_pkg_name: ${{ needs.Get-openssl-static-1xx-version.outputs.pkg_1xx_name }}
+      openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.zip
+
+  Build-and-upload-openssl-static-3xx:
+    needs: Get-openssl-static-3xx-version
+    uses: ./.github/workflows/openssl-static_base_workflow.yml
+    with:
+      openssl_ver: ${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
+      openssl_pkg_name: ${{ needs.Get-openssl-static-3xx-version.outputs.pkg_3xx_name }}
+      openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip
 
   create-release:
     runs-on: ubuntu-latest
-    needs: [build-and-upload-openssl-static-1xx,build-and-upload-openssl-static-3xx]
+    needs: [Get-openssl-static-1xx-version,Get-openssl-static-3xx-version,Build-and-upload-openssl-static-1xx,Build-and-upload-openssl-static-3xx]
     steps:
       - name: Download openssl-1xx release file
         uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 #v3.0.0
         with:
-          name: openssl-static-${{ env.openssl_1xx_ver }}
+          name: openssl-static-${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}
 
       - name: Download openssl-3xx release file
         uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 #v3.0.0
         with:
-          name: openssl-static-${{ env.openssl_3xx_ver }}
+          name: openssl-static-${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}
 
       - name: Release
         uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5 #v1
         with:
           files: |
-            ./openssl-OpenSSL_${{ env.openssl_1xx_ver }}.exe
-            ./openssl-openssl-${{ env.openssl_3xx_ver }}.exe
+            ./openssl-OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe
+            ./openssl-openssl-${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe
