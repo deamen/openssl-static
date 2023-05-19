@@ -17,8 +17,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build-and-upload-openssl-static-3xx:
+  Get-openssl-static-3xx-version:
     runs-on: windows-2022
+    outputs:
+      openssl_ver: ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
+      pkg_name: ${{ steps.Read-OpenSSL-version.outputs.pkg_name }}
     steps:
       - uses: actions/checkout@v3
       - id: Read-OpenSSL-version
@@ -28,8 +31,11 @@ jobs:
             $openssl_ver=$(Get-Content openssl_3xx_versions.yml | Select-String -Pattern "openssl_ver_3xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
             Write-Output "openssl_ver=${openssl_ver}" >> $env:GITHUB_OUTPUT
             Write-Output "pkg_name=openssl-openssl-${openssl_ver}" >> $env:GITHUB_OUTPUT
-      - uses: ./.github/workflows/openssl-static_base_workflow.yml
-        with:
-          openssl_ver: ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
-          openssl_pkg_name: ${{ steps.Read-OpenSSL-version.outputs.pkg_name }}.zip
-          openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/openssl-${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}.zip
+
+  Build-and-upload-openssl-static-3xx:
+    needs: Get-openssl-static-3xx-version
+    uses: ./.github/workflows/openssl-static_base_workflow.yml
+    with:
+      openssl_ver: ${{ needs.Get-openssl-static-3xx-version.outputs.openssl_ver }}
+      openssl_pkg_name: ${{ needs.Get-openssl-static-3xx-version.outputs.pkg_name }}.zip
+      openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_ver }}.zip
