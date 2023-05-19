@@ -67,11 +67,11 @@ jobs:
       - name: Download openssl-3xx release file
         uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 #v3.0.0
         with:
-          name: openssl-static-${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}
+          name: openssl-static-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
 
       - name: Release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 #v0.1.15
         with:
           files: |
             ./openssl-OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe
-            ./openssl-openssl-${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe
+            ./openssl-openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.exe
