@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build-and-upload-openssl-static-1xx:
+  Get-openssl-static-1xx-version:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3
@@ -29,8 +29,11 @@ jobs:
             Write-Output "openssl_ver=${openssl_ver}" >> $env:GITHUB_OUTPUT
             Write-Output "pkg_name=openssl-OpenSSL_${openssl_ver}" >> $env:GITHUB_OUTPUT
 
+  Build-and-upload-openssl-static-1xx:
+    needs: Get-openssl-static-1xx-version
+    runs-on: windows-2022
     uses: ./.github/workflows/openssl-static_base_workflow.yml
     with:
-      openssl_ver: ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
-      openssl_pkg_name: ${{ steps.Read-OpenSSL-version.outputs.pkg_name }}.zip
-      openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}.zip
+      openssl_ver: ${{ needs.Get-openssl-static-1xx-version.outputs.openssl_ver }}
+      openssl_pkg_name: ${{ needs.Get-openssl-static-1xx-version.outputs.pkg_name }}.zip
+      openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_ver }}.zip
