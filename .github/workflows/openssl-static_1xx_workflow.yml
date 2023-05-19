@@ -19,6 +19,9 @@ on:
 jobs:
   Get-openssl-static-1xx-version:
     runs-on: windows-2022
+    outputs:
+      openssl_ver: ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
+      pkg_name: ${{ steps.Read-OpenSSL-version.outputs.pkg_name }}
     steps:
       - uses: actions/checkout@v3
       - id: Read-OpenSSL-version
