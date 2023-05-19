@@ -37,5 +37,5 @@ jobs:
     uses: ./.github/workflows/openssl-static_base_workflow.yml
     with:
       openssl_ver: ${{ needs.Get-openssl-static-3xx-version.outputs.openssl_ver }}
-      openssl_pkg_name: ${{ needs.Get-openssl-static-3xx-version.outputs.pkg_name }}.zip
+      openssl_pkg_name: ${{ needs.Get-openssl-static-3xx-version.outputs.pkg_name }}
       openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_ver }}.zip
