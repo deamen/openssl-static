@@ -42,7 +42,7 @@ jobs:
         working-directory: ./${{ inputs.openssl_pkg_name }}
 
       - name: Upload the openssl-${{ inputs.openssl_ver }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: openssl-static-${{ inputs.openssl_ver }}
           path: ./${{ inputs.openssl_pkg_name }}/apps/${{ inputs.openssl_pkg_name }}.exe
