@@ -80,7 +80,7 @@ jobs:
       - name: Download openssl-dll-3xx release file
         uses: actions/download-artifact@v5.0.0
         with:
-          name: openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
+          name: openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip
 
       - name: Generate SHA256 checksums
         run: |
