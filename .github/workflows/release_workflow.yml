@@ -59,15 +59,47 @@ jobs:
     runs-on: ubuntu-latest
     needs: [Get-openssl-static-1xx-version,Get-openssl-static-3xx-version,Build-and-upload-openssl-static-1xx,Build-and-upload-openssl-static-3xx]
     steps:
-      - name: Download openssl-1xx release file
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 #v5.0.0
-        with:
-          name: openssl-static-${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}
+      # Poll the GitHub Actions Artifacts API to wait for both artifacts to be available
+      # before downloading. This avoids transient 404 errors that can occur when artifacts
+      # are uploaded but not yet propagated through GitHub's artifact listing API.
+      - name: Wait for and download artifacts
+        env:
+          ART1: openssl-static-${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}
+          ART2: openssl-static-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          owner_repo="${{ github.repository }}"
+          runid="${{ github.run_id }}"
 
-      - name: Download openssl-3xx release file
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 #v5.0.0
-        with:
-          name: openssl-static-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
+          download_artifact() {
+            local name="$1"
+            local max_attempts=60
+            local attempt=1
+            echo "Looking for artifact '$name' for run $runid (repo $owner_repo)"
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt/$max_attempts..."
+              resp=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                "https://api.github.com/repos/${owner_repo}/actions/runs/${runid}/artifacts")
+              artifact_id=$(echo "$resp" | jq -r --arg NAME "$name" '.artifacts[] | select(.name==$NAME) | .id' | head -n1 || true)
+              if [ -n "$artifact_id" ]; then
+                echo "Found artifact '$name' id=$artifact_id"
+                echo "Downloading artifact ZIP..."
+                curl -s -L -H "Authorization: token $GITHUB_TOKEN" \
+                  "https://api.github.com/repos/${owner_repo}/actions/artifacts/${artifact_id}/zip" -o "${name}.zip"
+                echo "Unzipping ${name}.zip"
+                unzip -o "${name}.zip" -d .
+                return 0
+              fi
+              attempt=$((attempt+1))
+              sleep 5
+            done
+            echo "Artifact '$name' not found after $max_attempts attempts" >&2
+            return 1
+          }
+
+          download_artifact "$ART1"
+          download_artifact "$ART2"
 
       - name: Release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 #v0.1.15
