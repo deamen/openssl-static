@@ -37,12 +37,12 @@ jobs:
         run: nmake
         working-directory: ./${{ inputs.openssl_pkg_name }}
 
-      - name: Rename openssl.exe
-        run: copy apps\openssl.exe apps\${{ inputs.openssl_pkg_name }}.exe
+      - name: Create openssl-dll zip package
+        run: |
+          powershell Compress-Archive -Path .\apps\lib*.dll -DestinationPath openssl-dll-${{ inputs.openssl_ver }}.zip
         working-directory: ./${{ inputs.openssl_pkg_name }}
-
-      - name: Upload the openssl-${{ inputs.openssl_ver }}
+      - name: Upload the openssl-dll-${{ inputs.openssl_ver }}
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: openssl-${{ inputs.openssl_ver }}
-          path: ./${{ inputs.openssl_pkg_name }}/apps/
+          name: openssl-dll-${{ inputs.openssl_ver }}
+          path: ./${{ inputs.openssl_pkg_name }}/apps/openssl-dll-${{ inputs.openssl_ver }}.zip

@@ -54,6 +54,14 @@ jobs:
       openssl_ver: ${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
       openssl_pkg_name: ${{ needs.Get-openssl-static-3xx-version.outputs.pkg_3xx_name }}
       openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip
+  
+  Build-and-upload-openssl-dll-3xx:
+    needs: Get-openssl-static-3xx-version
+    uses: ./.github/workflows/openssl-dll_base_workflow.yml
+    with:
+      openssl_ver: ${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
+      openssl_pkg_name: ${{ needs.Get-openssl-static-3xx-version.outputs.pkg_3xx_name }}
+      openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip
 
   create-release:
     runs-on: ubuntu-latest
@@ -68,6 +76,11 @@ jobs:
         uses: actions/download-artifact@v5.0.0
         with:
           name: openssl-static-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
+      
+      - name: Download openssl-dll-3xx release file
+        uses: actions/download-artifact@v5.0.0
+        with:
+          name: openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
 
       - name: Release
         uses: softprops/action-gh-release@v2.4.1
@@ -75,3 +88,4 @@ jobs:
           files: |
             ./openssl-OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe
             ./openssl-openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.exe
+            ./openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip
