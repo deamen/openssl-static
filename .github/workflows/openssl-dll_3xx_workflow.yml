@@ -1,0 +1,41 @@
+name: "Build openssl-dll 3xx Windows"
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'openssl_3xx_versions.yml'
+      - '.github/workflows/openssl-dll_base_workflow.yml'
+      - '.github/workflows/openssl-dll_3xx_workflow.yml'
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      - 'openssl_3xx_versions.yml'
+      - '.github/workflows/openssl-dll_base_workflow.yml'
+      - '.github/workflows/openssl-dll_3xx_workflow.yml'
+
+  workflow_dispatch:
+
+jobs:
+  Get-openssl-dll-3xx-version:
+    runs-on: windows-2022
+    outputs:
+      openssl_ver: ${{ steps.Read-OpenSSL-version.outputs.openssl_ver }}
+      pkg_name: ${{ steps.Read-OpenSSL-version.outputs.pkg_name }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: Read-OpenSSL-version
+        name: Read OpenSSL version from file
+        shell: pwsh
+        run: |
+            $openssl_ver=$(Get-Content openssl_3xx_versions.yml | Select-String -Pattern "openssl_ver_3xx" | ForEach-Object { $_.ToString().Split(":")[1].Trim() })
+            Write-Output "openssl_ver=${openssl_ver}" >> $env:GITHUB_OUTPUT
+            Write-Output "pkg_name=openssl-openssl-${openssl_ver}" >> $env:GITHUB_OUTPUT
+
+  Build-and-upload-openssl-dll-3xx:
+    needs: Get-openssl-dll-3xx-version
+    uses: ./.github/workflows/openssl-dll_base_workflow.yml@master
+    with:
+      openssl_ver: ${{ needs.Get-openssl-dll-3xx-version.outputs.openssl_ver }}
+      openssl_pkg_name: ${{ needs.Get-openssl-dll-3xx-version.outputs.pkg_name }}
+      openssl_source_url: https://github.com/openssl/openssl/archive/refs/tags/openssl-${{ needs.Get-openssl-dll-3xx-version.outputs.openssl_ver }}.zip
