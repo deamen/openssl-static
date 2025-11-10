@@ -82,6 +82,12 @@ jobs:
         with:
           name: openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}
 
+      - name: Generate SHA256 checksums
+        run: |
+          sha256sum ./openssl-OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe > ./openssl-OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe.sha256
+          sha256sum ./openssl-openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.exe > ./openssl-openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.exe.sha256
+          sha256sum ./openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip > ./openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip.sha256
+
       - name: Release
         uses: softprops/action-gh-release@v2.4.1
         with:
@@ -89,3 +95,6 @@ jobs:
             ./openssl-OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe
             ./openssl-openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.exe
             ./openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip
+            ./openssl-OpenSSL_${{ needs.Get-openssl-static-1xx-version.outputs.openssl_1xx_ver }}.exe.sha256
+            ./openssl-openssl-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.exe.sha256
+            ./openssl-dll-${{ needs.Get-openssl-static-3xx-version.outputs.openssl_3xx_ver }}.zip.sha256
