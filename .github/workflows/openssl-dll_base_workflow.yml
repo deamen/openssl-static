@@ -1,4 +1,4 @@
-name: openssl-static base workflow
+name: openssl-dll base workflow
 
 on:
   workflow_call:
@@ -14,8 +14,8 @@ on:
         type: string
 
 jobs:
- 
-  build-openssl-static-bin:
+
+  build-openssl-dll:
     runs-on: windows-2022
     steps:
       - uses: ilammy/setup-nasm@v1.5.2
